@@ -113,4 +113,18 @@ router.delete("/:username", correctUser, async function (req, res, next) {
   }
 });
 
+router.post(
+  "/:username/jobs/:id",
+  correctUser,
+  async function (req, res, next) {
+    try {
+      let { id } = +req.params;
+      let applied = await User.apply(req.params.username, id);
+      return res.json({ applied: id });
+    } catch (e) {
+      return next(e);
+    }
+  }
+);
+
 module.exports = router;
