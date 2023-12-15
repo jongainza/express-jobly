@@ -19,22 +19,22 @@ class Job {
     return job;
   }
 
-  static async findAll(request = {}) {
+  static async findAll({ minSalary, hasEquity, title } = {}) {
     let query = ` SELECT id, title, salary, equity, company_handle AS companyHandle
                 FROM jobs`;
 
     let whereExpressions = [];
     let whereValues = [];
 
-    if (request.minSalary) {
+    if (minSalary) {
       whereValues.push(request.minSalary);
       whereExpressions.push(`salary>=$${whereValues.length}`);
     }
-    if (request.hasEquity) {
+    if (hasEquity) {
       whereValues.push(request.hasEquity);
       whereExpressions.push(`equity=$${whereValues.length}`);
     }
-    if (title) {
+    if (title !== undefined) {
       whereValues.push(`%${title}%`);
       whereExpressions.push(`title ILIKE $${whereValues.length}`);
     }
@@ -50,7 +50,7 @@ class Job {
     let search = await db.query(
       `SELECT id, title, salary,equity,company_handle as "companyHandle" 
                                 FROM jobs 
-                                WHERE id=S1`,
+                                WHERE id=$1`,
       [id]
     );
     let job = search.rows[0];
@@ -62,7 +62,7 @@ class Job {
                                     WHERE handle=$1`,
       [job.companyHandle]
     );
-
+    delete job.companyHandle;
     job.company = company.rows[0];
 
     return job;
@@ -70,7 +70,7 @@ class Job {
 
   static async update(id, data) {
     let { setCols, values } = sqlForPartialUpdate(data, {});
-    let idVar = "$" + (values.lenght + 1);
+    let idVar = "$" + (values.length + 1);
     let query = `UPDATE jobs
                 SET ${setCols}
                 WHERE id = ${idVar}
@@ -84,7 +84,9 @@ class Job {
   }
 
   static async remove(id) {
-    let result = db.query(`DELETE * FROM jobs WHERE id=$1 RETURNING id`, [id]);
+    let result = await db.query(`DELETE FROM jobs WHERE id=$1 RETURNING id`, [
+      id,
+    ]);
     let job = result.rows[0];
     if (!job) throw new NotFoundError(`no job:${id}`);
   }

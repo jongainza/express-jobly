@@ -4,31 +4,32 @@
   "type": "object",
   "default": {},
   "title": "Root Schema",
+  "required": ["title"],
   "properties": {
-    "maxEmployees": {
-      "type": "integer",
-      "default": 0,
-      "title": "The maxEmployes Schema",
-      "examples": [10]
-    },
-    "minEmployees": {
-      "type": "integer",
-      "default": 0,
-      "title": "The minEmployes Schema",
-      "examples": [0]
-    },
-    "name": {
+    "title": {
       "type": "string",
       "default": "",
-      "title": "The name Schema",
-      "examples": ["judas"]
+      "title": "The title Schema",
+      "examples": ["driver"]
+    },
+    "salary": {
+      "type": "integer",
+      "default": 0,
+      "title": "The salary Schema",
+      "examples": [50000]
+    },
+    "equity": {
+      "type": "integer",
+      "default": 0,
+      "title": "The equity Schema",
+      "examples": [0]
     }
   },
   "examples": [
     {
-      "maxEmployes": 10,
-      "minEmployes": 0,
-      "name": "judas"
+      "title": "driver",
+      "salary": 50000,
+      "equity": 0
     }
   ]
 }
