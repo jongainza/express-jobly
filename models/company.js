@@ -44,12 +44,12 @@ class Company {
    * Returns [{ handle, name, description, numEmployees, logoUrl }, ...]
    * */
 
-  static async findAll(request = {}) {
+  static async findAll(filters = {}) {
     let query = `SELECT handle,name,description,num_employees AS "numEmployees", logo_url AS "logoUrl" FROM companies`;
     let whereExpressions = [];
     let whereValues = [];
 
-    const { minEmployees, maxEmployees, name } = request;
+    const { minEmployees, maxEmployees, name } = filters;
 
     if (minEmployees > maxEmployees)
       throw new BadRequestError(
@@ -58,16 +58,16 @@ class Company {
 
     if (maxEmployees !== undefined) {
       whereValues.push(maxEmployees);
-      whereExpressions.push(`num_employees<=$${whereValues.length}`);
+      whereExpressions.push(`num_employees <= $${whereValues.length}`);
     }
 
     if (minEmployees !== undefined) {
       whereValues.push(minEmployees);
-      whereValues.push(`num_employees >= $${whereValues.length}`);
+      whereExpressions.push(`num_employees >= $${whereValues.length}`);
     }
 
     if (name) {
-      whereValues.push(name);
+      whereValues.push(`%${name}%`);
       whereExpressions.push(` name ILIKE $${whereValues.length}`);
     }
 
@@ -98,6 +98,10 @@ class Company {
            WHERE handle = $1`,
       [handle]
     );
+
+    const company = companyRes.rows[0];
+    if (!company) throw new NotFoundError(`No company: ${handle}`);
+
     let j = await db.query(
       `SELECT id, title, salary, equity
                                 FROM jobs 
@@ -107,11 +111,7 @@ class Company {
 
     let jobs = j.rows;
 
-    const company = companyRes.rows[0];
-
     company.jobs = jobs;
-
-    if (!company) throw new NotFoundError(`No company: ${handle}`);
 
     return company;
   }

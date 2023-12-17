@@ -52,11 +52,15 @@ router.post("/", isAdmin, async function (req, res, next) {
 router.get("/", async function (req, res, next) {
   let request = req.query;
   // if minEmployes is in the query is converted from string to integer
-  if (request.minEmployees !== undefined)
+  if (request.minEmployees !== undefined) {
     request.minEmployees = +request.minEmployees;
+  }
+
   // if maxEmployes is in the query is converted from string to integer
-  if (request.maxEmployees !== undefined)
+  if (request.maxEmployees !== undefined) {
     request.maxEmployees = +request.maxEmployees;
+  }
+
   try {
     // compares the query passed with the schema created to filter
     const validator = jsonschema.validate(request, companyFilterSchema);
